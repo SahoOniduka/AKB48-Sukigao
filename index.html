@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AKB48 神7 好き顔メーカー</title>
+    <title>AKB48 神7 好き顔ソート</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -86,40 +86,96 @@
         button:disabled { background: #ccc; }
         .btn-secondary { background: #666; }
 
+        /* 比較（2択）画面用スタイル */
+        .battle-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .battle-card {
+            flex: 1;
+            border: 3px solid #ffb3d9;
+            border-radius: 12px;
+            padding: 10px;
+            cursor: pointer;
+            background: #fff;
+            transition: 0.2s;
+        }
+        .battle-card:hover {
+            border-color: #e6005c;
+            background: #ffe6f0;
+            transform: translateY(-3px);
+        }
+        .battle-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .battle-card .name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .vs-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6005c;
+        }
+
+        /* 結果発表（神7ランキング）用スタイル */
         #capture-area {
             background: #fff;
             padding: 15px;
             display: inline-block;
             border-radius: 8px;
         }
-        /* 神7用グリッド（上段3人、中段3人、下段1人などバランス良く） */
-        .grid-kami7 {
-            display: grid;
-            grid-template-columns: repeat(3, 100px);
-            gap: 4px;
-            background: #fff;
-            justify-content: center;
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            text-align: left;
+            max-width: 350px;
+            margin: 0 auto;
         }
-        .slot {
-            background: #f0f0f0;
+        .rank-item {
+            display: flex;
+            align-items: center;
+            background: #fafafa;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 6px 10px;
+            gap: 12px;
+        }
+        .rank-badge {
+            font-size: 14px;
+            font-weight: bold;
+            color: #fff;
+            background: #e6005c;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #ddd;
-            width: 100px;
-            height: 100px;
+            flex-shrink: 0;
         }
-        .slot.center-slot {
-            grid-column: 2; /* 7人目を綺麗に配置するための調整 */
+        .rank-item:nth-child(1) .rank-badge { background: #ffd700; color: #333; } /* 1位ゴールド */
+        .rank-item:nth-child(2) .rank-badge { background: #c0c0c0; color: #333; } /* 2位シルバー */
+        .rank-item:nth-child(3) .rank-badge { background: #cd7f32; } /* 3位ブロンズ */
+
+        .rank-img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            flex-shrink: 0;
         }
-        .slot img { width: 100%; height: 100%; object-fit: cover; }
-        .slot .label {
-            position: absolute;
-            bottom: 0; width: 100%;
-            background: rgba(230, 0, 92, 0.85);
-            color: #fff; font-size: 10px; font-weight: bold; padding: 2px 0;
+        .rank-name {
+            font-size: 14px;
+            font-weight: bold;
         }
 
         .hidden { display: none; }
@@ -127,11 +183,12 @@
 </head>
 <body>
 
-    <h1>AKB48 神7 好き顔メーカー</h1>
+    <h1>AKB48 神7 好き顔ソート</h1>
 
+    <!-- フェーズ1：予選（14人選択） -->
     <div id="phase1" class="step-container">
-        <h2>【予選】気になるメンバーを選択</h2>
-        <p class="desc">最大<b>14人</b>まで選んで「神7決戦へ進む」を押してね！</p>
+        <h2>【予選】メンバーを14人選ぶ</h2>
+        <p class="desc">ソートにかけたいメンバーを、最大<b>14人</b>まで選んでね！</p>
         <div class="page-info" id="page-counter">1 / 5 ページ目 （選択中: <span id="selected-count">0</span> / 14人）</div>
 
         <div class="member-grid-9" id="prelim-grid"></div>
@@ -139,26 +196,42 @@
         <div class="btn-group">
             <button id="prev-btn" class="btn-secondary" onclick="changePage(-1)">前へ</button>
             <button id="next-btn" onclick="changePage(1)">次へ</button>
-            <button id="to-phase2-btn" onclick="startFinal()">神7決戦へ進む</button>
+            <button id="to-sort-btn" onclick="startSort()" disabled>この14人でソート開始！</button>
         </div>
     </div>
 
+    <!-- フェーズ2：2択バトル（ソート中） -->
     <div id="phase2" class="step-container hidden">
-        <h2>【本選】マイスター神7（7人）を選出</h2>
-        <p class="desc">予選で選んだメンバーから、厳選して7人を配置してね</p>
+        <h2>【勝ち上がりバトル】どっちが好き？</h2>
+        <p class="desc" id="progress-desc">比較中...</p>
+
+        <div class="battle-container">
+            <div class="battle-card" onclick="selectWinner(0)">
+                <img id="fighter0-img" src="" crossorigin="anonymous">
+                <div class="name" id="fighter0-name"></div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="battle-card" onclick="selectWinner(1)">
+                <img id="fighter1-img" src="" crossorigin="anonymous">
+                <div class="name" id="fighter1-name"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- フェーズ3：結果発表（神7ランキング） -->
+    <div id="phase3" class="step-container hidden">
+        <h2>🎉 あなたの神7ランキング完成！</h2>
+        <p class="desc">1位〜7位までの結果だよ</p>
 
         <div id="capture-area">
-            <div style="font-weight:bold; color:#e6005c; margin-bottom:8px;">My AKB48 神7</div>
-            <div class="grid-kami7" id="final-grid"></div>
+            <div style="font-weight:bold; color:#e6005c; margin-bottom:12px; font-size:16px;">My AKB48 神7 Ranking</div>
+            <div class="ranking-list" id="ranking-list"></div>
         </div>
 
-        <div style="margin: 15px 0;" class="btn-group">
-            <button onclick="downloadImage()">画像を保存してシェア</button>
-            <button class="btn-secondary" onclick="backToPrelim()">予選に戻る</button>
+        <div style="margin: 20px 0 10px;" class="btn-group">
+            <button onclick="downloadImage()">ランキング画像を保存</button>
+            <button class="btn-secondary" onclick="location.reload()">最初からやり直す</button>
         </div>
-
-        <h3>予選通過メンバー（タップで神7枠に追加/解除）</h3>
-        <div class="member-grid-9" id="final-candidates"></div>
     </div>
 
     <script>
@@ -175,11 +248,18 @@
         }));
 
         let prelimSelected = [];
-        let finalSelected = [];
         let currentPage = 0;
         const PAGE_SIZE = 9;
         const MAX_PRELIM = 14;
-        const KAMI_7 = 7;
+
+        // ソート用の変数
+        let sortQueues = [];
+        let parentQueue = [];
+        let currentLeft = [];
+        let currentRight = [];
+        let sortedResults = [];
+        let totalComparisons = 0;
+        let currentComparisonCount = 0;
 
         renderPrelimPage();
 
@@ -203,6 +283,15 @@
             document.getElementById('page-counter').innerHTML = `${currentPage + 1} / ${maxPage} ページ目 （選択中: <b style="color:#e6005c">${prelimSelected.length}</b> / ${MAX_PRELIM}人）`;
             document.getElementById('prev-btn').disabled = currentPage === 0;
             document.getElementById('next-btn').disabled = currentPage >= maxPage - 1;
+
+            const sortBtn = document.getElementById('to-sort-btn');
+            if (prelimSelected.length > 1) {
+                sortBtn.disabled = false;
+                sortBtn.innerText = `この${prelimSelected.length}人でソート開始！`;
+            } else {
+                sortBtn.disabled = true;
+                sortBtn.innerText = `2人以上選んでね`;
+            }
         }
 
         function togglePrelimSelect(member) {
@@ -224,81 +313,126 @@
             renderPrelimPage();
         }
 
-        function startFinal() {
-            if (prelimSelected.length === 0) {
-                alert("メンバーが1人以上選ばれていますか？予選で選んでから進んでね！");
-                return;
-            }
+        // --- マージソート（2択比較ロジック）の開始 ---
+        function startSort() {
             document.getElementById('phase1').classList.add('hidden');
             document.getElementById('phase2').classList.remove('hidden');
-            renderFinalGrid();
-            renderFinalCandidates();
+
+            // 選択されたメンバーをシャッフルして初期化
+            let list = [...prelimSelected];
+            sortQueues = list.map(item => [item]);
+            nextMergeStep();
         }
 
-        function backToPrelim() {
-            document.getElementById('phase2').classList.add('hidden');
-            document.getElementById('phase1').classList.remove('hidden');
-        }
-
-        function renderFinalGrid() {
-            const grid = document.getElementById('final-grid');
-            grid.innerHTML = '';
-            for (let i = 0; i < KAMI_7; i++) {
-                const slot = document.createElement('div');
-                slot.className = 'slot';
-                // 7人目を中央に配置するためのスタイル調整（お好みで）
-                if (i === 6) {
-                    slot.classList.add('center-slot');
-                }
-                if (finalSelected[i]) {
-                    slot.innerHTML = `<img src="${finalSelected[i].img}" crossorigin="anonymous"><div class="label">${finalSelected[i].name}</div>`;
-                    slot.onclick = () => removeFinalSelect(i);
-                } else {
-                    slot.innerHTML = `<span style="color:#ccc; font-size:20px;">+</span>`;
-                }
-                grid.appendChild(slot);
+        function nextMergeStep() {
+            if (sortQueues.length <= 1) {
+                // ソート完了！結果発表へ
+                showRanking();
+                return;
             }
+
+            parentQueue = [];
+            for (let i = 0; i < sortQueues.length; i += 2) {
+                if (i + 1 < sortQueues.length) {
+                    parentQueue.push({
+                        left: sortQueues[i],
+                        right: sortQueues[i+1],
+                        merged: []
+                    });
+                } else {
+                    parentQueue.push({
+                        left: sortQueues[i],
+                        right: [],
+                        merged: sortQueues[i]
+                    });
+                }
+            }
+            sortQueues = [];
+            processNextPair();
         }
 
-        function renderFinalCandidates() {
-            const container = document.getElementById('final-candidates');
-            container.innerHTML = '';
-            prelimSelected.forEach(member => {
-                const isSelected = finalSelected.some(m => m.id === member.id);
-                const card = document.createElement('div');
-                card.className = `card ${isSelected ? 'selected' : ''}`;
-                card.onclick = () => toggleFinalSelect(member);
-                card.innerHTML = `<img src="${member.img}" crossorigin="anonymous"><span class="name">${member.name}</span>`;
-                container.CDF = true;
-                container.appendChild(card);
+        function processNextPair() {
+            if (parentQueue.length === 0) {
+                nextMergeStep();
+                return;
+            }
+
+            let currentPair = parentQueue[0];
+
+            // 片方が空なら自動マージ
+            if (currentPair.left.length === 0) {
+                currentPair.merged.push(...currentPair.right);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+                processNextPair();
+                return;
+            }
+            if (currentPair.right.length === 0) {
+                currentPair.merged.push(...currentPair.left);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+                processNextPair();
+                return;
+            }
+
+            // 比較画面に2人をセット
+            currentLeft = currentPair.left;
+            currentRight = currentPair.right;
+
+            document.getElementById('fighter0-img').src = currentLeft[0].img;
+            document.getElementById('fighter0-name').innerText = currentLeft[0].name;
+            document.getElementById('fighter1-img').src = currentRight[0].img;
+            document.getElementById('fighter1-name').innerText = currentRight[0].name;
+        }
+
+        function selectWinner(choice) {
+            let currentPair = parentQueue[0];
+            if (choice === 0) {
+                currentPair.merged.push(currentPair.left.shift());
+            } else {
+                currentPair.merged.push(currentPair.right.shift());
+            }
+
+            if (currentPair.left.length === 0 || currentPair.right.length === 0) {
+                if (currentPair.left.length > 0) currentPair.merged.push(...currentPair.left);
+                if (currentPair.right.length > 0) currentPair.merged.push(...currentPair.right);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+            }
+
+            processNextPair();
+        }
+
+        function showRanking() {
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase3').classList.remove('hidden');
+
+            const rankingList = document.getElementById('ranking-list');
+            rankingList.innerHTML = '';
+
+            // sortQueues[0] が全ソートされた配列
+            const sorted = sortQueues[0] || [];
+            // 上位7人（または選択人数分）を神7として表示
+            const kami7 = sorted.slice(0, 7);
+
+            kami7.forEach((member, index) => {
+                const item = document.createElement('div');
+                item.className = 'rank-item';
+                item.innerHTML = `
+                    <div class="rank-badge">${index + 1}</div>
+                    <img class="rank-img" src="${member.img}" crossorigin="anonymous">
+                    <div class="rank-name">${member.name}</div>
+                `;
+                rankingList.appendChild(item);
             });
         }
 
-        function toggleFinalSelect(member) {
-            const index = finalSelected.findIndex(m => m.id === member.id);
-            if (index > -1) {
-                finalSelected.splice(index, 1);
-            } else {
-                if (finalSelected.length < KAMI_7) finalSelected.push(member);
-                else alert("神7枠（7人）がすでにいっぱいです！枠をタップして外してください。");
-            }
-            renderFinalGrid();
-            renderFinalCandidates();
-        }
-
-        function removeFinalSelect(index) {
-            finalSelected.splice(index, 1);
-            renderFinalGrid();
-            renderFinalCandidates();
-        }
-
         function downloadImage() {
-            if (finalSelected.length < KAMI_7 && !confirm("まだ7人選ばれていませんが、このまま保存しますか？")) return;
             const capture = document.getElementById('capture-area');
             html2canvas(capture, { scale: 2, useCORS: true }).then(canvas => {
                 const a = document.createElement('a');
                 a.href = canvas.toDataURL('image/png');
-                a.download = 'akb48_kami7.png';
+                a.download = 'akb48_kami7_ranking.png';
                 a.click();
             });
         }
