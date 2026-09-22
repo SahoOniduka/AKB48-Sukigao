@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AKB48 好き顔9選メーカー</title>
+    <title>AKB48 神7 好き顔メーカー</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
@@ -27,7 +27,6 @@
             margin: 0 auto 20px;
         }
 
-        /* 予選スタイル */
         .page-info { font-weight: bold; color: #e6005c; margin-bottom: 10px; }
         .member-grid-9 {
             display: grid;
@@ -73,8 +72,7 @@
             text-overflow: ellipsis;
         }
 
-        /* ボタン類 */
-        .btn-group { display: flex; justify-content: center; gap: 10px; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
         button {
             padding: 10px 18px;
             font-size: 14px;
@@ -88,19 +86,19 @@
         button:disabled { background: #ccc; }
         .btn-secondary { background: #666; }
 
-        /* 3x3グリッド */
         #capture-area {
             background: #fff;
             padding: 15px;
             display: inline-block;
             border-radius: 8px;
         }
-        .grid-3x3 {
+        /* 神7用グリッド（上段3人、中段3人、下段1人などバランス良く） */
+        .grid-kami7 {
             display: grid;
             grid-template-columns: repeat(3, 100px);
-            grid-template-rows: repeat(3, 100px);
             gap: 4px;
             background: #fff;
+            justify-content: center;
         }
         .slot {
             background: #f0f0f0;
@@ -110,6 +108,11 @@
             position: relative;
             overflow: hidden;
             border: 1px solid #ddd;
+            width: 100px;
+            height: 100px;
+        }
+        .slot.center-slot {
+            grid-column: 2; /* 7人目を綺麗に配置するための調整 */
         }
         .slot img { width: 100%; height: 100%; object-fit: cover; }
         .slot .label {
@@ -124,74 +127,65 @@
 </head>
 <body>
 
-    <h1>AKB48 好き顔9選メーカー</h1>
+    <h1>AKB48 神7 好き顔メーカー</h1>
 
-    <!-- PHASE 1: 予選（18人以上ピックアップ） -->
     <div id="phase1" class="step-container">
         <h2>【予選】気になるメンバーを選択</h2>
-        <p class="desc">9人ずつ表示されます。好き顔候補を<b>18人以上</b>選んでください！</p>
-        <div class="page-info" id="page-counter">1 / 5 ページ目 （選択中: <span id="selected-count">0</span>人）</div>
+        <p class="desc">最大<b>14人</b>まで選んで「神7決戦へ進む」を押してね！</p>
+        <div class="page-info" id="page-counter">1 / 5 ページ目 （選択中: <span id="selected-count">0</span> / 14人）</div>
 
         <div class="member-grid-9" id="prelim-grid"></div>
 
         <div class="btn-group">
             <button id="prev-btn" class="btn-secondary" onclick="changePage(-1)">前へ</button>
             <button id="next-btn" onclick="changePage(1)">次へ</button>
-            <button id="to-phase2-btn" onclick="startFinal()" disabled>本選へ進む (18人以上必要)</button>
+            <button id="to-phase2-btn" onclick="startFinal()">神7決戦へ進む</button>
         </div>
     </div>
 
-    <!-- PHASE 2: 本選（予選通過組から最終9人を選定） -->
     <div id="phase2" class="step-container hidden">
-        <h2>【本選】最強の9人を選出</h2>
-        <p class="desc">予選で選んだメンバーの中から、最終的に9人をタップして選んでください。</p>
+        <h2>【本選】マイスター神7（7人）を選出</h2>
+        <p class="desc">予選で選んだメンバーから、厳選して7人を配置してね</p>
 
-        <!-- 3x3 完成図 -->
         <div id="capture-area">
-            <div style="font-weight:bold; color:#e6005c; margin-bottom:8px;">My AKB48 9Faces</div>
-            <div class="grid-3x3" id="final-grid"></div>
+            <div style="font-weight:bold; color:#e6005c; margin-bottom:8px;">My AKB48 神7</div>
+            <div class="grid-kami7" id="final-grid"></div>
         </div>
 
-        <div style="margin: 15px 0;">
+        <div style="margin: 15px 0;" class="btn-group">
             <button onclick="downloadImage()">画像を保存してシェア</button>
             <button class="btn-secondary" onclick="backToPrelim()">予選に戻る</button>
         </div>
 
-        <h3>予選通過メンバー（タップで枠に追加/解除）</h3>
+        <h3>予選通過メンバー（タップで神7枠に追加/解除）</h3>
         <div class="member-grid-9" id="final-candidates"></div>
     </div>
 
     <script>
-        // 最新メンバー一覧（岩立沙穂〜渡邉葵心）
-        // ※画像URLはプレースホルダーに設定しています。本番は公式サイトのアー写URL等を差し替えてご利用ください。
         const allMembers = [
-            // 正規メンバー & Team8
             "岩立 沙穂", "福岡 聖菜", "小栗 有以", "行天 優莉奈", "倉野尾 成美", "坂川 陽香", "下尾 みう", "髙橋 彩音", "徳永 羚海",
             "永野 芹佳", "橋本 陽菜", "千葉 恵里", "黒須 遥香", "長友 彩海", "武藤 小麟", "山内 瑞葵", "山根 涼羽", "太田 有紀",
             "佐藤 綺星", "橋本 恵理子", "畠山 希美", "平田 侑希", "布袋 百椛", "正鋳 真優", "水島 美結", "山﨑 空", "秋山 由奈",
             "新井 彩永", "工藤 華純", "久保 姫菜乃", "迫 由芽実", "成田 香姫奈", "八木 愛月", "山口 結愛", "伊藤 百花", "奥本 カイリ",
-            "川村 結衣",
-            // 研究生（20期・21期）
-            "大賀 彩姫", "近藤 沙樹", "丸山 ひなた", "髙橋 舞桜", "田中 沙友利", "牧戸 愛茉", "森川 優", "渡邉 葵心"
+            "川村 結衣", "大賀 彩姫", "近藤 沙樹", "丸山 ひなた", "髙橋 舞桜", "田中 沙友利", "牧戸 愛茉", "森川 優", "渡邉 葵心"
         ].map((name, index) => ({
             id: index + 1,
             name: name,
             img: `https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=${encodeURIComponent(name)}`
         }));
 
-        let prelimSelected = []; // 予選で選んだメンバー
-        let finalSelected = [];  // 最終的に3x3に選んだメンバー
+        let prelimSelected = [];
+        let finalSelected = [];
         let currentPage = 0;
         const PAGE_SIZE = 9;
+        const MAX_PRELIM = 14;
+        const KAMI_7 = 7;
 
-        // 初期化
         renderPrelimPage();
 
-        // 予選画面のレンダリング（9人ずつ表示）
         function renderPrelimPage() {
             const grid = document.getElementById('prelim-grid');
             grid.innerHTML = '';
-
             const start = currentPage * PAGE_SIZE;
             const end = start + PAGE_SIZE;
             const pageMembers = allMembers.slice(start, end);
@@ -201,30 +195,14 @@
                 const card = document.createElement('div');
                 card.className = `card ${isSelected ? 'selected' : ''}`;
                 card.onclick = () => togglePrelimSelect(member);
-                card.innerHTML = `
-                    <img src="${member.img}" crossorigin="anonymous">
-                    <span class="name">${member.name}</span>
-                `;
+                card.innerHTML = `<img src="${member.img}" crossorigin="anonymous"><span class="name">${member.name}</span>`;
                 grid.appendChild(card);
             });
 
-            // ページ情報の更新
             const maxPage = Math.ceil(allMembers.length / PAGE_SIZE);
-            document.getElementById('page-counter').innerHTML = 
-                `${currentPage + 1} / ${maxPage} ページ目 （予選選択中: <b style="color:#e6005c">${prelimSelected.length}</b>人）`;
-
+            document.getElementById('page-counter').innerHTML = `${currentPage + 1} / ${maxPage} ページ目 （選択中: <b style="color:#e6005c">${prelimSelected.length}</b> / ${MAX_PRELIM}人）`;
             document.getElementById('prev-btn').disabled = currentPage === 0;
             document.getElementById('next-btn').disabled = currentPage >= maxPage - 1;
-
-            // 18人以上選ばないと本選に進めない制御
-            const toFinalBtn = document.getElementById('to-phase2-btn');
-            if (prelimSelected.length >= 18) {
-                toFinalBtn.disabled = false;
-                toFinalBtn.innerText = `本選に進む (${prelimSelected.length}人選出中)`;
-            } else {
-                toFinalBtn.disabled = true;
-                toFinalBtn.innerText = `本選へ (あと${18 - prelimSelected.length}人必要)`;
-            }
         }
 
         function togglePrelimSelect(member) {
@@ -232,7 +210,11 @@
             if (index > -1) {
                 prelimSelected.splice(index, 1);
             } else {
-                prelimSelected.push(member);
+                if (prelimSelected.length < MAX_PRELIM) {
+                    prelimSelected.push(member);
+                } else {
+                    alert(`予選で選べるのは最大${MAX_PRELIM}人までです！`);
+                }
             }
             renderPrelimPage();
         }
@@ -242,8 +224,11 @@
             renderPrelimPage();
         }
 
-        // 本選へ移動
         function startFinal() {
+            if (prelimSelected.length === 0) {
+                alert("メンバーが1人以上選ばれていますか？予選で選んでから進んでね！");
+                return;
+            }
             document.getElementById('phase1').classList.add('hidden');
             document.getElementById('phase2').classList.remove('hidden');
             renderFinalGrid();
@@ -255,19 +240,18 @@
             document.getElementById('phase1').classList.remove('hidden');
         }
 
-        // 3x3マスの描画
         function renderFinalGrid() {
             const grid = document.getElementById('final-grid');
             grid.innerHTML = '';
-
-            for (let i = 0; i < 9; i++) {
+            for (let i = 0; i < KAMI_7; i++) {
                 const slot = document.createElement('div');
                 slot.className = 'slot';
+                // 7人目を中央に配置するためのスタイル調整（お好みで）
+                if (i === 6) {
+                    slot.classList.add('center-slot');
+                }
                 if (finalSelected[i]) {
-                    slot.innerHTML = `
-                        <img src="${finalSelected[i].img}" crossorigin="anonymous">
-                        <div class="label">${finalSelected[i].name}</div>
-                    `;
+                    slot.innerHTML = `<img src="${finalSelected[i].img}" crossorigin="anonymous"><div class="label">${finalSelected[i].name}</div>`;
                     slot.onclick = () => removeFinalSelect(i);
                 } else {
                     slot.innerHTML = `<span style="color:#ccc; font-size:20px;">+</span>`;
@@ -276,20 +260,16 @@
             }
         }
 
-        // 予選通過メンバー一覧（本選用）の描画
         function renderFinalCandidates() {
             const container = document.getElementById('final-candidates');
             container.innerHTML = '';
-
             prelimSelected.forEach(member => {
                 const isSelected = finalSelected.some(m => m.id === member.id);
                 const card = document.createElement('div');
                 card.className = `card ${isSelected ? 'selected' : ''}`;
                 card.onclick = () => toggleFinalSelect(member);
-                card.innerHTML = `
-                    <img src="${member.img}" crossorigin="anonymous">
-                    <span class="name">${member.name}</span>
-                `;
+                card.innerHTML = `<img src="${member.img}" crossorigin="anonymous"><span class="name">${member.name}</span>`;
+                container.CDF = true;
                 container.appendChild(card);
             });
         }
@@ -299,11 +279,8 @@
             if (index > -1) {
                 finalSelected.splice(index, 1);
             } else {
-                if (finalSelected.length < 9) {
-                    finalSelected.push(member);
-                } else {
-                    alert("本選枠（9人）がすでにいっぱいです！枠をタップして解除してください。");
-                }
+                if (finalSelected.length < KAMI_7) finalSelected.push(member);
+                else alert("神7枠（7人）がすでにいっぱいです！枠をタップして外してください。");
             }
             renderFinalGrid();
             renderFinalCandidates();
@@ -315,16 +292,13 @@
             renderFinalCandidates();
         }
 
-        // 画像保存処理
         function downloadImage() {
-            if (finalSelected.length < 9) {
-                if (!confirm("まだ9人選ばれていませんが、このまま保存しますか？")) return;
-            }
+            if (finalSelected.length < KAMI_7 && !confirm("まだ7人選ばれていませんが、このまま保存しますか？")) return;
             const capture = document.getElementById('capture-area');
             html2canvas(capture, { scale: 2, useCORS: true }).then(canvas => {
                 const a = document.createElement('a');
                 a.href = canvas.toDataURL('image/png');
-                a.download = 'akb48_sukigao_9.png';
+                a.download = 'akb48_kami7.png';
                 a.click();
             });
         }
