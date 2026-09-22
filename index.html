@@ -1,512 +1,538 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AKB48 神7 好き顔ソート</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<style>
-body {
-font-family: 'Helvetica Neue', Arial, sans-serif;
-text-align: center;
-background-color: #fff0f5;
-color: #333;
-margin: 0;
-padding: 15px;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKB48 神7 好き顔ソート</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            background-color: #fff0f5;
+            color: #333;
+            margin: 0;
+            padding: 15px;
+        }
 
-h1 { font-size: 22px; color: #e6005c; margin-bottom: 5px; }
-p.desc { font-size: 13px; color: #666; margin-top: 0; }
+        h1 { font-size: 22px; color: #e6005c; margin-bottom: 5px; }
+        p.desc { font-size: 13px; color: #666; margin-top: 0; }
 
-.step-container {
-background: #fff;
-padding: 15px;
-border-radius: 12px;
-box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-max-width: 500px;
-margin: 0 auto 20px;
-}
+        .step-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 500px;
+            margin: 0 auto 20px;
+        }
 
-.page-info { font-weight: bold; color: #e6005c; margin-bottom: 10px; }
-.member-grid-9 {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 10px;
-margin-bottom: 15px;
-}
-.card {
-border: 2px solid #eee;
-border-radius: 8px;
-padding: 5px;
-cursor: pointer;
-transition: 0.2s;
-background: #fafafa;
-position: relative;
-}
-.card.selected {
-border-color: #e6005c;
-background: #ffe6f0;
-}
-.card.selected::after {
-content: "✓";
-position: absolute;
-top: 2px;
-right: 5px;
-color: #e6005c;
-font-weight: bold;
-font-size: 16px;
-}
-.card img {
-width: 100%;
-aspect-ratio: 1;
-object-fit: cover;
-border-radius: 6px;
-background: #ffe6f0;
-}
-.card .name {
-font-size: 11px;
-font-weight: bold;
-margin-top: 4px;
-display: block;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
+        .page-info { font-weight: bold; color: #e6005c; margin-bottom: 10px; }
+        .member-grid-9 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .card {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            padding: 5px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: #fafafa;
+            position: relative;
+        }
+        .card.selected {
+            border-color: #e6005c;
+            background: #ffe6f0;
+        }
+        .card.selected::after {
+            content: "✓";
+            position: absolute;
+            top: 2px;
+            right: 5px;
+            color: #e6005c;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #ffe6f0;
+        }
+        .card .name {
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 4px;
+            display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-.btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
-button {
-padding: 10px 18px;
-font-size: 14px;
-font-weight: bold;
-border: none;
-border-radius: 20px;
-background: #e6005c;
-color: #fff;
-cursor: pointer;
-}
-button:disabled { background: #ccc; }
-.btn-secondary { background: #666; }
+        .btn-group { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        button {
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            background: #e6005c;
+            color: #fff;
+            cursor: pointer;
+        }
+        button:disabled { background: #ccc; }
+        .btn-secondary { background: #666; }
+        .btn-twitter { background: #000000; } /* X（Twitter）用の黒ボタン */
 
-/* 比較（2択）画面用スタイル */
-.battle-container {
-display: flex;
-justify-content: space-around;
-align-items: center;
-gap: 10px;
-margin: 20px 0;
-}
-.battle-card {
-flex: 1;
-border: 3px solid #ffb3d9;
-border-radius: 12px;
-padding: 10px;
-cursor: pointer;
-background: #fff;
-transition: 0.2s;
-}
-.battle-card:hover {
-border-color: #e6005c;
-background: #ffe6f0;
-transform: translateY(-3px);
-}
-.battle-card img {
-width: 100%;
-aspect-ratio: 1;
-object-fit: cover;
-border-radius: 8px;
-background: #ffe6f0;
-}
-.battle-card .name {
-font-size: 14px;
-font-weight: bold;
-margin-top: 8px;
-}
-.vs-text {
-font-size: 18px;
-font-weight: bold;
-color: #e6005c;
-}
+        /* 比較（2択）画面用スタイル */
+        .battle-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .battle-card {
+            flex: 1;
+            border: 3px solid #ffb3d9;
+            border-radius: 12px;
+            padding: 10px;
+            cursor: pointer;
+            background: #fff;
+            transition: 0.2s;
+        }
+        .battle-card:hover {
+            border-color: #e6005c;
+            background: #ffe6f0;
+            transform: translateY(-3px);
+        }
+        .battle-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #ffe6f0;
+        }
+        .battle-card .name {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+        .vs-text {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6005c;
+        }
 
-/* ─── 神7 大きめリザルト画面スタイル ─── */
-#capture-area {
-background: #fff;
-padding: 20px 15px;
-display: inline-block;
-border-radius: 12px;
-width: 100%;
-box-sizing: border-box;
-}
-.kami7-display {
-display: flex;
-flex-direction: column;
-gap: 12px;
-}
-/* 1位（センター・一番大きく！） */
-.rank-1-card {
-background: linear-gradient(135deg, #fff9fb, #ffe6f0);
-border: 3px solid #ffd700;
-border-radius: 12px;
-padding: 12px;
-display: flex;
-align-items: center;
-gap: 15px;
-position: relative;
-}
-.rank-1-card img {
-width: 90px;
-height: 90px;
-object-fit: cover;
-border-radius: 8px;
-border: 2px solid #ffd700;
-background: #ffe6f0;
-}
-.rank-1-info {
-text-align: left;
-}
-.rank-1-badge {
-background: #ffd700;
-color: #333;
-font-size: 12px;
-font-weight: bold;
-padding: 2px 8px;
-border-radius: 10px;
-display: inline-block;
-margin-bottom: 4px;
-}
-.rank-1-name {
-font-size: 18px;
-font-weight: bold;
-color: #e6005c;
-}
+        /* ─── 神7 大きめリザルト画面スタイル ─── */
+        #capture-area {
+            background: #fff;
+            padding: 20px 15px;
+            display: inline-block;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .kami7-display {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        /* 1位（センター・一番大きく！） */
+        .rank-1-card {
+            background: linear-gradient(135deg, #fff9fb, #ffe6f0);
+            border: 3px solid #ffd700;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        .rank-1-card img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ffd700;
+            background: #ffe6f0;
+        }
+        .rank-1-info {
+            text-align: left;
+        }
+        .rank-1-badge {
+            background: #ffd700;
+            color: #333;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .rank-1-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6005c;
+        }
 
-/* 2位〜7位のグリッド表示（写真を大きく） */
-.rank-sub-grid {
-display: grid;
-grid-template-columns: repeat(2, 1fr);
-gap: 10px;
-}
-.rank-card {
-background: #fafafa;
-border: 2px solid #eee;
-border-radius: 10px;
-padding: 8px;
-position: relative;
-text-align: center;
-}
-.rank-card img {
-width: 100%;
-aspect-ratio: 1;
-object-fit: cover;
-border-radius: 8px;
-background: #ffe6f0;
-}
-.rank-badge-sub {
-position: absolute;
-top: 12px;
-left: 12px;
-background: #e6005c;
-color: #fff;
-font-size: 11px;
-font-weight: bold;
-width: 24px;
-height: 24px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.rank-card:nth-child(1) .rank-badge-sub { background: #c0c0c0; color: #333; } /* 2位シルバー */
-.rank-card:nth-child(2) .rank-badge-sub { background: #cd7f32; } /* 3位ブロンズ */
+        /* 2位〜7位のグリッド表示（写真を大きく） */
+        .rank-sub-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .rank-card {
+            background: #fafafa;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 8px;
+            position: relative;
+            text-align: center;
+        }
+        .rank-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #ffe6f0;
+        }
+        .rank-badge-sub {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: #e6005c;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .rank-card:nth-child(1) .rank-badge-sub { background: #c0c0c0; color: #333; } /* 2位シルバー */
+        .rank-card:nth-child(2) .rank-badge-sub { background: #cd7f32; } /* 3位ブロンズ */
 
-.rank-name-sub {
-font-size: 13px;
-font-weight: bold;
-margin-top: 6px;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
+        .rank-name-sub {
+            font-size: 13px;
+            font-weight: bold;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-.hidden { display: none; }
-</style>
+        .hidden { display: none; }
+    </style>
 </head>
 <body>
 
-<h1>AKB48 神7 好き顔ソート</h1>
+    <h1>AKB48 神7 好き顔ソート</h1>
 
-<!-- フェーズ1：予選（14人選択） -->
-<div id="phase1" class="step-container">
-<h2>【予選】メンバーを14人選ぶ</h2>
-<p class="desc">ソートにかけたいメンバーを、最大<b>14人</b>まで選んでね！</p>
-<div class="page-info" id="page-counter">1 / 5 ページ目 （選択中: <span id="selected-count">0</span> / 14人）</div>
+    <!-- フェーズ1：予選（14人選択） -->
+    <div id="phase1" class="step-container">
+        <h2>【予選】メンバーを14人選ぶ</h2>
+        <p class="desc">ソートにかけたいメンバーを、最大<b>14人</b>まで選んでね！</p>
+        <div class="page-info" id="page-counter">1 / 5 ページ目 （選択中: <span id="selected-count">0</span> / 14人）</div>
 
-<div class="member-grid-9" id="prelim-grid"></div>
+        <div class="member-grid-9" id="prelim-grid"></div>
 
-<div class="btn-group">
-<button id="prev-btn" class="btn-secondary" onclick="changePage(-1)">前へ</button>
-<button id="next-btn" onclick="changePage(1)">次へ</button>
-<button id="to-sort-btn" onclick="startSort()" disabled>この14人でソート開始！</button>
-</div>
-</div>
+        <div class="btn-group">
+            <button id="prev-btn" class="btn-secondary" onclick="changePage(-1)">前へ</button>
+            <button id="next-btn" onclick="changePage(1)">次へ</button>
+            <button id="to-sort-btn" onclick="startSort()" disabled>この14人でソート開始！</button>
+        </div>
+    </div>
 
-<!-- フェーズ2：2択バトル（ソート中） -->
-<div id="phase2" class="step-container hidden">
-<h2>【勝ち上がりバトル】どっちが好き？</h2>
-<p class="desc" id="progress-desc">比較中...</p>
+    <!-- フェーズ2：2択バトル（ソート中） -->
+    <div id="phase2" class="step-container hidden">
+        <h2>【勝ち上がりバトル】どっちが好き？</h2>
+        <p class="desc" id="progress-desc">比較中...</p>
 
-<div class="battle-container">
-<div class="battle-card" onclick="selectWinner(0)">
-<img id="fighter0-img" src="" loading="lazy">
-<div class="name" id="fighter0-name"></div>
-</div>
-<div class="vs-text">VS</div>
-<div class="battle-card" onclick="selectWinner(1)">
-<img id="fighter1-img" src="" loading="lazy">
-<div class="name" id="fighter1-name"></div>
-</div>
-</div>
-</div>
+        <div class="battle-container">
+            <div class="battle-card" onclick="selectWinner(0)">
+                <img id="fighter0-img" src="" loading="lazy">
+                <div class="name" id="fighter0-name"></div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="battle-card" onclick="selectWinner(1)">
+                <img id="fighter1-img" src="" loading="lazy">
+                <div class="name" id="fighter1-name"></div>
+            </div>
+        </div>
+    </div>
 
-<!-- フェーズ3：結果発表（神7大きく表示） -->
-<div id="phase3" class="step-container hidden">
-<h2>🎉 あなたの神7完成！</h2>
-<p class="desc">栄光の神7メンバーはこちら！</p>
+    <!-- フェーズ3：結果発表（神7大きく表示） -->
+    <div id="phase3" class="step-container hidden">
+        <h2>🎉 あなたの神7完成！</h2>
+        <p class="desc">栄光の神7メンバーはこちら！</p>
 
-<div id="capture-area">
-<div style="font-weight:bold; color:#e6005c; margin-bottom:15px; font-size:18px; letter-spacing:1px;">👑 My AKB48 神7 👑</div>
+        <div id="capture-area">
+            <div style="font-weight:bold; color:#e6005c; margin-bottom:15px; font-size:18px; letter-spacing:1px;">👑 My AKB48 神7 👑</div>
+            
+            <div class="kami7-display">
+                <!-- 1位（センター・大きく表示） -->
+                <div id="rank-1-container"></div>
 
-<div class="kami7-display">
-<!-- 1位（センター・大きく表示） -->
-<div id="rank-1-container"></div>
+                <!-- 2位〜7位（グリッド表示） -->
+                <div class="rank-sub-grid" id="rank-sub-grid"></div>
+            </div>
+        </div>
 
-<!-- 2位〜7位（グリッド表示） -->
-<div class="rank-sub-grid" id="rank-sub-grid"></div>
-</div>
-</div>
+        <div style="margin: 20px 0 10px;" class="btn-group">
+            <button onclick="downloadImage()">神7画像を保存する</button>
+            <button class="btn-twitter" onclick="shareToX()">𝕏 で結果をシェア</button>
+            <button class="btn-secondary" onclick="location.reload()">最初からやり直す</button>
+        </div>
+    </div>
 
-<div style="margin: 20px 0 10px;" class="btn-group">
-<button onclick="downloadImage()">神7画像を保存する</button>
-<button class="btn-secondary" onclick="location.reload()">最初からやり直す</button>
-</div>
-</div>
+    <script>
+        const rawNames = [
+            "岩立沙穂", "福岡聖菜", "小栗有以", "行天優莉奈", "倉野尾成美", "坂川陽香", "下尾みう", "髙橋彩音", "徳永羚海",
+            "永野芹佳", "橋本陽菜", "千葉恵里", "黒須遥香", "長友彩海", "武藤小麟", "山内瑞葵", "山根涼羽", "太田有紀",
+            "佐藤綺星", "橋本恵理子", "畠山希美", "平田侑希", "布袋百椛", "正鋳真優", "水島美結", "山﨑空", "秋山由奈",
+            "新井彩永", "工藤華純", "久保姫菜乃", "迫由芽実", "成田香姫奈", "八木愛月", "山口結愛", "伊藤百花", "奥本カイリ",
+            "川村結衣", "大賀彩姫", "近藤沙樹", "丸山ひなた", "髙橋舞桜", "田中沙友利", "牧戸愛茉", "森川優", "渡邉葵心"
+        ];
 
-<script>
-const rawNames = [
-"岩立沙穂", "福岡聖菜", "小栗有以", "行天優莉奈", "倉野尾成美", "坂川陽香", "下尾みう", "髙橋彩音", "徳永羚海",
-"永野芹佳", "橋本陽菜", "千葉恵里", "黒須遥香", "長友彩海", "武藤小麟", "山内瑞葵", "山根涼羽", "太田有紀",
-"佐藤綺星", "橋本恵理子", "畠山希美", "平田侑希", "布袋百椛", "正鋳真優", "水島美結", "山﨑空", "秋山由奈",
-"新井彩永", "工藤華純", "久保姫菜乃", "迫由芽実", "成田香姫奈", "八木愛月", "山口結愛", "伊藤百花", "奥本カイリ",
-"川村結衣", "大賀彩姫", "近藤沙樹", "丸山ひなた", "髙橋舞桜", "田中沙友利", "牧戸愛茉", "森川優", "渡邉葵心"
-];
+        // 重複を完全に排除し、安全にユニークなリストを作成
+        const uniqueNames = Array.from(new Set(rawNames));
 
-// 同じフォルダ内にある画像をストレートに指定する形（エラーの原因となる外部プレースホルダーを排除）
-const allMembers = rawNames.map((name, index) => {
-return {
-id: index + 1,
-name: name,
-img: `${name}.jpg`
-};
-});
+        const allMembers = uniqueNames.map((name, index) => {
+            return {
+                id: index + 1,
+                name: name,
+                img: `${name}.jpg`
+            };
+        });
 
-let prelimSelected = [];
-let currentPage = 0;
-const PAGE_SIZE = 9;
-const MAX_PRELIM = 14;
+        let prelimSelected = [];
+        let currentPage = 0;
+        const PAGE_SIZE = 9;
+        const MAX_PRELIM = 14;
 
-let sortQueues = [];
-let parentQueue = [];
-let currentLeft = [];
-let currentRight = [];
+        let sortQueues = [];
+        let parentQueue = [];
+        let currentLeft = [];
+        let currentRight = [];
+        let finalKami7Names = []; // シェア用に神7の名前を保持する変数
 
-renderPrelimPage();
+        renderPrelimPage();
 
-function renderPrelimPage() {
-const grid = document.getElementById('prelim-grid');
-grid.innerHTML = '';
-const start = currentPage * PAGE_SIZE;
-const end = start + PAGE_SIZE;
-const pageMembers = allMembers.slice(start, end);
+        function renderPrelimPage() {
+            const grid = document.getElementById('prelim-grid');
+            grid.innerHTML = '';
+            const start = currentPage * PAGE_SIZE;
+            const end = start + PAGE_SIZE;
+            const pageMembers = allMembers.slice(start, end);
 
-pageMembers.forEach(member => {
-const isSelected = prelimSelected.some(m => m.id === member.id);
-const card = document.createElement('div');
-card.className = `card ${isSelected ? 'selected' : ''}`;
-card.onclick = () => togglePrelimSelect(member);
-card.innerHTML = `<img src="${member.img}" loading="lazy"><span class="name">${member.name}</span>`;
-grid.appendChild(card);
-});
+            pageMembers.forEach(member => {
+                const isSelected = prelimSelected.some(m => m.id === member.id);
+                const card = document.createElement('div');
+                card.className = `card ${isSelected ? 'selected' : ''}`;
+                card.onclick = () => togglePrelimSelect(member);
+                card.innerHTML = `<img src="${member.img}" loading="lazy"><span class="name">${member.name}</span>`;
+                grid.appendChild(card);
+            });
 
-const maxPage = Math.ceil(allMembers.length / PAGE_SIZE);
-document.getElementById('page-counter').innerHTML = `${currentPage + 1} / ${maxPage} ページ目 （選択中: <b style="color:#e6005c">${prelimSelected.length}</b> / ${MAX_PRELIM}人）`;
-document.getElementById('prev-btn').disabled = currentPage === 0;
-document.getElementById('next-btn').disabled = currentPage >= maxPage - 1;
+            const maxPage = Math.ceil(allMembers.length / PAGE_SIZE);
+            document.getElementById('page-counter').innerHTML = `${currentPage + 1} / ${maxPage} ページ目 （選択中: <b style="color:#e6005c">${prelimSelected.length}</b> / ${MAX_PRELIM}人）`;
+            document.getElementById('prev-btn').disabled = currentPage === 0;
+            document.getElementById('next-btn').disabled = currentPage >= maxPage - 1;
 
-const sortBtn = document.getElementById('to-sort-btn');
-if (prelimSelected.length > 1) {
-sortBtn.disabled = false;
-sortBtn.innerText = `この${prelimSelected.length}人でソート開始！`;
-} else {
-sortBtn.disabled = true;
-sortBtn.innerText = `2人以上選んでね`;
-}
-}
+            const sortBtn = document.getElementById('to-sort-btn');
+            if (prelimSelected.length > 1) {
+                sortBtn.disabled = false;
+                sortBtn.innerText = `この${prelimSelected.length}人でソート開始！`;
+            } else {
+                sortBtn.disabled = true;
+                sortBtn.innerText = `2人以上選んでね`;
+            }
+        }
 
-function togglePrelimSelect(member) {
-const index = prelimSelected.findIndex(m => m.id === member.id);
-if (index > -1) {
-prelimSelected.splice(index, 1);
-} else {
-if (prelimSelected.length < MAX_PRELIM) {
-prelimSelected.push(member);
-} else {
-alert(`予選で選べるのは最大${MAX_PRELIM}人までです！`);
-}
-}
-renderPrelimPage();
-}
+        function togglePrelimSelect(member) {
+            const index = prelimSelected.findIndex(m => m.id === member.id);
+            if (index > -1) {
+                prelimSelected.splice(index, 1);
+            } else {
+                if (prelimSelected.length < MAX_PRELIM) {
+                    prelimSelected.push(member);
+                } else {
+                    alert(`予選で選べるのは最大${MAX_PRELIM}人までです！`);
+                }
+            }
+            renderPrelimPage();
+        }
 
-function changePage(delta) {
-currentPage += delta;
-renderPrelimPage();
-}
+        function changePage(delta) {
+            currentPage += delta;
+            renderPrelimPage();
+        }
 
-function startSort() {
-document.getElementById('phase1').classList.add('hidden');
-document.getElementById('phase2').classList.remove('hidden');
+        function startSort() {
+            document.getElementById('phase1').classList.add('hidden');
+            document.getElementById('phase2').classList.remove('hidden');
 
-let list = [...prelimSelected];
-sortQueues = list.map(item => [item]);
-nextMergeStep();
-}
+            let list = [...prelimSelected];
+            sortQueues = list.map(item => [item]);
+            nextMergeStep();
+        }
 
-function nextMergeStep() {
-if (sortQueues.length <= 1) {
-showRanking();
-return;
-}
+        function nextMergeStep() {
+            if (sortQueues.length <= 1) {
+                showRanking();
+                return;
+            }
 
-parentQueue = [];
-for (let i = 0; i < sortQueues.length; i += 2) {
-if (i + 1 < sortQueues.length) {
-parentQueue.push({
-left: sortQueues[i],
-right: sortQueues[i+1],
-merged: []
-});
-} else {
-parentQueue.push({
-left: sortQueues[i],
-right: [],
-merged: sortQueues[i]
-});
-}
-}
-sortQueues = [];
-processNextPair();
-}
+            parentQueue = [];
+            for (let i = 0; i < sortQueues.length; i += 2) {
+                if (i + 1 < sortQueues.length) {
+                    parentQueue.push({
+                        left: sortQueues[i],
+                        right: sortQueues[i+1],
+                        merged: []
+                    });
+                } else {
+                    parentQueue.push({
+                        left: sortQueues[i],
+                        right: [],
+                        merged: sortQueues[i]
+                    });
+                }
+            }
+            sortQueues = [];
+            processNextPair();
+        }
 
-function processNextPair() {
-if (parentQueue.length === 0) {
-nextMergeStep();
-return;
-}
+        function processNextPair() {
+            if (parentQueue.length === 0) {
+                nextMergeStep();
+                return;
+            }
 
-let currentPair = parentQueue[0];
+            let currentPair = parentQueue[0];
 
-if (currentPair.left.length === 0) {
-currentPair.merged.push(...currentPair.right);
-parentQueue.shift();
-sortQueues.push(currentPair.merged);
-processNextPair();
-return;
-}
-if (currentPair.right.length === 0) {
-currentPair.merged.push(...currentPair.left);
-parentQueue.shift();
-sortQueues.push(currentPair.merged);
-processNextPair();
-return;
-}
+            if (currentPair.left.length === 0) {
+                currentPair.merged.push(...currentPair.right);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+                processNextPair();
+                return;
+            }
+            if (currentPair.right.length === 0) {
+                currentPair.merged.push(...currentPair.left);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+                processNextPair();
+                return;
+            }
 
-currentLeft = currentPair.left;
-currentRight = currentPair.right;
+            currentLeft = currentPair.left;
+            currentRight = currentPair.right;
 
-document.getElementById('fighter0-img').src = currentLeft[0].img;
-document.getElementById('fighter0-name').innerText = currentLeft[0].name;
+            document.getElementById('fighter0-img').src = currentLeft[0].img;
+            document.getElementById('fighter0-name').innerText = currentLeft[0].name;
 
-document.getElementById('fighter1-img').src = currentRight[0].img;
-document.getElementById('fighter1-name').innerText = currentRight[0].name;
-}
+            document.getElementById('fighter1-img').src = currentRight[0].img;
+            document.getElementById('fighter1-name').innerText = currentRight[0].name;
+        }
 
-function selectWinner(choice) {
-let currentPair = parentQueue[0];
-if (choice === 0) {
-currentPair.merged.push(currentPair.left.shift());
-} else {
-currentPair.merged.push(currentPair.right.shift());
-}
+        function selectWinner(choice) {
+            let currentPair = parentQueue[0];
+            if (choice === 0) {
+                currentPair.merged.push(currentPair.left.shift());
+            } else {
+                currentPair.merged.push(currentPair.right.shift());
+            }
 
-if (currentPair.left.length === 0 || currentPair.right.length === 0) {
-if (currentPair.left.length > 0) currentPair.merged.push(...currentPair.left);
-if (currentPair.right.length > 0) currentPair.merged.push(...currentPair.right);
-parentQueue.shift();
-sortQueues.push(currentPair.merged);
-}
+            if (currentPair.left.length === 0 || currentPair.right.length === 0) {
+                if (currentPair.left.length > 0) currentPair.merged.push(...currentPair.left);
+                if (currentPair.right.length > 0) currentPair.merged.push(...currentPair.right);
+                parentQueue.shift();
+                sortQueues.push(currentPair.merged);
+            }
 
-processNextPair();
-}
+            processNextPair();
+        }
 
-function showRanking() {
-document.getElementById('phase2').classList.add('hidden');
-document.getElementById('phase3').classList.remove('hidden');
+        function showRanking() {
+            document.getElementById('phase2').classList.add('hidden');
+            document.getElementById('phase3').classList.remove('hidden');
 
-const sorted = sortQueues[0] || [];
-const kami7 = sorted.slice(0, 7);
+            const sorted = sortQueues[0] || [];
+            // 重複を完全に排除しつつ、足りない場合はそのままの配列を使う安全なスライス
+            const uniqueSorted = Array.from(new Set(sorted.map(m => m.name))).map(name => sorted.find(m => m.name === name));
+            const kami7 = uniqueSorted.slice(0, 7);
+            
+            finalKami7Names = kami7.map(m => m.name);
 
-// 1位（センター・大きく表示）
-const rank1Container = document.getElementById('rank-1-container');
-rank1Container.innerHTML = '';
-if (kami7.length > 0) {
-const m1 = kami7[0];
-rank1Container.innerHTML = `
-<div class="rank-1-card">
-<span style="position:absolute; top:8px; right:12px; font-size:20px;">👑</span>
-<img src="${m1.img}">
-<div class="rank-1-info">
-<div class="rank-1-badge">第 1 位 (CENTER)</div>
-<div class="rank-1-name">${m1.name}</div>
-</div>
-</div>
-`;
-}
+            // 1位（センター・大きく表示）
+            const rank1Container = document.getElementById('rank-1-container');
+            rank1Container.innerHTML = '';
+            if (kami7.length > 0) {
+                const m1 = kami7[0];
+                rank1Container.innerHTML = `
+                    <div class="rank-1-card">
+                        <span style="position:absolute; top:8px; right:12px; font-size:20px;">👑</span>
+                        <img src="${m1.img}">
+                        <div class="rank-1-info">
+                            <div class="rank-1-badge">第 1 位 (CENTER)</div>
+                            <div class="rank-1-name">${m1.name}</div>
+                        </div>
+                    </div>
+                `;
+            }
 
-// 2位〜7位のグリッド表示
-const rankSubGrid = document.getElementById('rank-sub-grid');
-rankSubGrid.innerHTML = '';
-const subMembers = kami7.slice(1, 7);
-subMembers.forEach((member, index) => {
-const rankNum = index + 2;
-const card = document.createElement('div');
-card.className = 'rank-card';
-card.innerHTML = `
-<div class="rank-badge-sub">${rankNum}</div>
-<img src="${member.img}">
-<div class="rank-name-sub">${member.name}</div>
-`;
-rankSubGrid.appendChild(card);
-});
-}
+            // 2位〜7位のグリッド表示
+            const rankSubGrid = document.getElementById('rank-sub-grid');
+            rankSubGrid.innerHTML = '';
+            const subMembers = kami7.slice(1, 7);
+            subMembers.forEach((member, index) => {
+                const rankNum = index + 2;
+                const card = document.createElement('div');
+                card.className = 'rank-card';
+                card.innerHTML = `
+                    <div class="rank-badge-sub">${rankNum}</div>
+                    <img src="${member.img}">
+                    <div class="rank-name-sub">${member.name}</div>
+                `;
+                rankSubGrid.appendChild(card);
+            });
+        }
 
-function downloadImage() {
-const capture = document.getElementById('capture-area');
-html2canvas(capture, { scale: 2, useCORS: true }).then(canvas => {
-const a = document.createElement('a');
-a.href = canvas.toDataURL('image/png');
-a.download = 'akb48_kami7_big.png';
-a.click();
-});
-}
-</script>
+        function downloadImage() {
+            const capture = document.getElementById('capture-area');
+            html2canvas(capture, { scale: 2, useCORS: true }).then(canvas => {
+                const a = document.createElement('a');
+                a.href = canvas.toDataURL('image/png');
+                a.download = 'akb48_kami7_big.png';
+                a.click();
+            });
+        }
+
+        // X（Twitter）シェア機能
+        function shareToX() {
+            const centerName = finalKami7Names[0] || '不明';
+            const text = `👑 私のAKB48 好き顔神7 👑\n\n【CENTER】${centerName}\n2位以降の神7メンバーも決まりました！\n\n#AKB48 #好き顔ソート`;
+            const url = location.href;
+            const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+            window.open(shareUrl, '_blank');
+        }
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
