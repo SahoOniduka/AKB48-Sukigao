@@ -297,7 +297,8 @@
         ].map((name, index) => ({
             id: index + 1,
             name: name,
-            img: `https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=${encodeURIComponent(name)}`
+            // 漢字のファイル名（.jpg）を自動で読み込む設定
+            img: `${name}.jpg`
         }));
 
         let prelimSelected = [];
@@ -324,7 +325,7 @@
                 const card = document.createElement('div');
                 card.className = `card ${isSelected ? 'selected' : ''}`;
                 card.onclick = () => togglePrelimSelect(member);
-                card.innerHTML = `<img src="${member.img}" crossorigin="anonymous"><span class="name">${member.name}</span>`;
+                card.innerHTML = `<img src="${member.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${member.name}')"><span class="name">${member.name}</span>`;
                 grid.appendChild(card);
             });
 
@@ -424,8 +425,11 @@
             currentRight = currentPair.right;
 
             document.getElementById('fighter0-img').src = currentLeft[0].img;
+            document.getElementById('fighter0-img').onerror = function() { this.src = 'https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=' + encodeURIComponent(currentLeft[0].name); };
             document.getElementById('fighter0-name').innerText = currentLeft[0].name;
+
             document.getElementById('fighter1-img').src = currentRight[0].img;
+            document.getElementById('fighter1-img').onerror = function() { this.src = 'https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=' + encodeURIComponent(currentRight[0].name); };
             document.getElementById('fighter1-name').innerText = currentRight[0].name;
         }
 
@@ -462,7 +466,7 @@
                 rank1Container.innerHTML = `
                     <div class="rank-1-card">
                         <span style="position:absolute; top:8px; right:12px; font-size:20px;">👑</span>
-                        <img src="${m1.img}" crossorigin="anonymous">
+                        <img src="${m1.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${m1.name}')">
                         <div class="rank-1-info">
                             <div class="rank-1-badge">第 1 位 (CENTER)</div>
                             <div class="rank-1-name">${m1.name}</div>
@@ -481,7 +485,7 @@
                 card.className = 'rank-card';
                 card.innerHTML = `
                     <div class="rank-badge-sub">${rankNum}</div>
-                    <img src="${member.img}" crossorigin="anonymous">
+                    <img src="${member.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${member.name}')">
                     <div class="rank-name-sub">${member.name}</div>
                 `;
                 rankSubGrid.appendChild(card);
@@ -500,6 +504,3 @@
     </script>
 </body>
 </html>
-
-
-
