@@ -125,57 +125,103 @@
             color: #e6005c;
         }
 
-        /* 結果発表（神7ランキング）用スタイル */
+        /* ─── 神7 大きめリザルト画面スタイル ─── */
         #capture-area {
             background: #fff;
-            padding: 15px;
+            padding: 20px 15px;
             display: inline-block;
-            border-radius: 8px;
+            border-radius: 12px;
+            width: 100%;
+            box-sizing: border-box;
         }
-        .ranking-list {
+        .kami7-display {
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            text-align: left;
-            max-width: 350px;
-            margin: 0 auto;
-        }
-        .rank-item {
-            display: flex;
-            align-items: center;
-            background: #fafafa;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 6px 10px;
             gap: 12px;
         }
-        .rank-badge {
-            font-size: 14px;
+        /* 1位（センター・一番大きく！） */
+        .rank-1-card {
+            background: linear-gradient(135deg, #fff9fb, #ffe6f0);
+            border: 3px solid #ffd700;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+        }
+        .rank-1-card img {
+            width: 90px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid #ffd700;
+        }
+        .rank-1-info {
+            text-align: left;
+        }
+        .rank-1-badge {
+            background: #ffd700;
+            color: #333;
+            font-size: 12px;
             font-weight: bold;
-            color: #fff;
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 4px;
+        }
+        .rank-1-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #e6005c;
+        }
+
+        /* 2位〜7位のグリッド表示（写真を大きく） */
+        .rank-sub-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        .rank-card {
+            background: #fafafa;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 8px;
+            position: relative;
+            text-align: center;
+        }
+        .rank-card img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        .rank-badge-sub {
+            position: absolute;
+            top: 12px;
+            left: 12px;
             background: #e6005c;
-            width: 28px;
-            height: 28px;
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
-        .rank-item:nth-child(1) .rank-badge { background: #ffd700; color: #333; } /* 1位ゴールド */
-        .rank-item:nth-child(2) .rank-badge { background: #c0c0c0; color: #333; } /* 2位シルバー */
-        .rank-item:nth-child(3) .rank-badge { background: #cd7f32; } /* 3位ブロンズ */
+        .rank-card:nth-child(1) .rank-badge-sub { background: #c0c0c0; color: #333; } /* 2位シルバー */
+        .rank-card:nth-child(2) .rank-badge-sub { background: #cd7f32; } /* 3位ブロンズ */
 
-        .rank-img {
-            width: 45px;
-            height: 45px;
-            object-fit: cover;
-            border-radius: 6px;
-            flex-shrink: 0;
-        }
-        .rank-name {
-            font-size: 14px;
+        .rank-name-sub {
+            font-size: 13px;
             font-weight: bold;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .hidden { display: none; }
@@ -218,18 +264,25 @@
         </div>
     </div>
 
-    <!-- フェーズ3：結果発表（神7ランキング） -->
+    <!-- フェーズ3：結果発表（神7大きく表示） -->
     <div id="phase3" class="step-container hidden">
-        <h2>🎉 あなたの神7ランキング完成！</h2>
-        <p class="desc">1位〜7位までの結果だよ</p>
+        <h2>🎉 あなたの神7完成！</h2>
+        <p class="desc">栄光の神7メンバーはこちら！</p>
 
         <div id="capture-area">
-            <div style="font-weight:bold; color:#e6005c; margin-bottom:12px; font-size:16px;">My AKB48 神7 Ranking</div>
-            <div class="ranking-list" id="ranking-list"></div>
+            <div style="font-weight:bold; color:#e6005c; margin-bottom:15px; font-size:18px; letter-spacing:1px;">👑 My AKB48 神7 👑</div>
+            
+            <div class="kami7-display">
+                <!-- 1位（センター・ビッグ表示） -->
+                <div id="rank-1-container"></div>
+
+                <!-- 2位〜7位（グリッド表示） -->
+                <div class="rank-sub-grid" id="rank-sub-grid"></div>
+            </div>
         </div>
 
         <div style="margin: 20px 0 10px;" class="btn-group">
-            <button onclick="downloadImage()">ランキング画像を保存</button>
+            <button onclick="downloadImage()">神7画像を保存する</button>
             <button class="btn-secondary" onclick="location.reload()">最初からやり直す</button>
         </div>
     </div>
@@ -252,14 +305,10 @@
         const PAGE_SIZE = 9;
         const MAX_PRELIM = 14;
 
-        // ソート用の変数
         let sortQueues = [];
         let parentQueue = [];
         let currentLeft = [];
         let currentRight = [];
-        let sortedResults = [];
-        let totalComparisons = 0;
-        let currentComparisonCount = 0;
 
         renderPrelimPage();
 
@@ -313,12 +362,10 @@
             renderPrelimPage();
         }
 
-        // --- マージソート（2択比較ロジック）の開始 ---
         function startSort() {
             document.getElementById('phase1').classList.add('hidden');
             document.getElementById('phase2').classList.remove('hidden');
 
-            // 選択されたメンバーをシャッフルして初期化
             let list = [...prelimSelected];
             sortQueues = list.map(item => [item]);
             nextMergeStep();
@@ -326,7 +373,6 @@
 
         function nextMergeStep() {
             if (sortQueues.length <= 1) {
-                // ソート完了！結果発表へ
                 showRanking();
                 return;
             }
@@ -359,7 +405,6 @@
 
             let currentPair = parentQueue[0];
 
-            // 片方が空なら自動マージ
             if (currentPair.left.length === 0) {
                 currentPair.merged.push(...currentPair.right);
                 parentQueue.shift();
@@ -375,7 +420,6 @@
                 return;
             }
 
-            // 比較画面に2人をセット
             currentLeft = currentPair.left;
             currentRight = currentPair.right;
 
@@ -407,23 +451,40 @@
             document.getElementById('phase2').classList.add('hidden');
             document.getElementById('phase3').classList.remove('hidden');
 
-            const rankingList = document.getElementById('ranking-list');
-            rankingList.innerHTML = '';
-
-            // sortQueues[0] が全ソートされた配列
             const sorted = sortQueues[0] || [];
-            // 上位7人（または選択人数分）を神7として表示
             const kami7 = sorted.slice(0, 7);
 
-            kami7.forEach((member, index) => {
-                const item = document.createElement('div');
-                item.className = 'rank-item';
-                item.innerHTML = `
-                    <div class="rank-badge">${index + 1}</div>
-                    <img class="rank-img" src="${member.img}" crossorigin="anonymous">
-                    <div class="rank-name">${member.name}</div>
+            // 1位（センター・大きく表示）
+            const rank1Container = document.getElementById('rank-1-container');
+            rank1Container.innerHTML = '';
+            if (kami7.length > 0) {
+                const m1 = kami7[0];
+                rank1Container.innerHTML = `
+                    <div class="rank-1-card">
+                        <span style="position:absolute; top:8px; right:12px; font-size:20px;">👑</span>
+                        <img src="${m1.img}" crossorigin="anonymous">
+                        <div class="rank-1-info">
+                            <div class="rank-1-badge">第 1 位 (CENTER)</div>
+                            <div class="rank-1-name">${m1.name}</div>
+                        </div>
+                    </div>
                 `;
-                rankingList.appendChild(item);
+            }
+
+            // 2位〜7位のグリッド表示
+            const rankSubGrid = document.getElementById('rank-sub-grid');
+            rankSubGrid.innerHTML = '';
+            const subMembers = kami7.slice(1, 7);
+            subMembers.forEach((member, index) => {
+                const rankNum = index + 2;
+                const card = document.createElement('div');
+                card.className = 'rank-card';
+                card.innerHTML = `
+                    <div class="rank-badge-sub">${rankNum}</div>
+                    <img src="${member.img}" crossorigin="anonymous">
+                    <div class="rank-name-sub">${member.name}</div>
+                `;
+                rankSubGrid.appendChild(card);
             });
         }
 
@@ -432,10 +493,13 @@
             html2canvas(capture, { scale: 2, useCORS: true }).then(canvas => {
                 const a = document.createElement('a');
                 a.href = canvas.toDataURL('image/png');
-                a.download = 'akb48_kami7_ranking.png';
+                a.download = 'akb48_kami7_big.png';
                 a.click();
             });
         }
     </script>
 </body>
 </html>
+
+
+
