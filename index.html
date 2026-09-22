@@ -61,6 +61,7 @@ width: 100%;
 aspect-ratio: 1;
 object-fit: cover;
 border-radius: 6px;
+background: #ffe6f0;
 }
 .card .name {
 font-size: 11px;
@@ -113,6 +114,7 @@ width: 100%;
 aspect-ratio: 1;
 object-fit: cover;
 border-radius: 8px;
+background: #ffe6f0;
 }
 .battle-card .name {
 font-size: 14px;
@@ -156,6 +158,7 @@ height: 90px;
 object-fit: cover;
 border-radius: 8px;
 border: 2px solid #ffd700;
+background: #ffe6f0;
 }
 .rank-1-info {
 text-align: left;
@@ -195,6 +198,7 @@ width: 100%;
 aspect-ratio: 1;
 object-fit: cover;
 border-radius: 8px;
+background: #ffe6f0;
 }
 .rank-badge-sub {
 position: absolute;
@@ -253,12 +257,12 @@ text-overflow: ellipsis;
 
 <div class="battle-container">
 <div class="battle-card" onclick="selectWinner(0)">
-<img id="fighter0-img" src="" crossorigin="anonymous">
+<img id="fighter0-img" src="" loading="lazy">
 <div class="name" id="fighter0-name"></div>
 </div>
 <div class="vs-text">VS</div>
 <div class="battle-card" onclick="selectWinner(1)">
-<img id="fighter1-img" src="" crossorigin="anonymous">
+<img id="fighter1-img" src="" loading="lazy">
 <div class="name" id="fighter1-name"></div>
 </div>
 </div>
@@ -296,15 +300,14 @@ const rawNames = [
 "川村結衣", "大賀彩姫", "近藤沙樹", "丸山ひなた", "髙橋舞桜", "田中沙友利", "牧戸愛茉", "森川優", "渡邉葵心"
 ];
 
-// GitHub Pagesのパス（リポジトリ名）を自動で考慮した画像パスにする
-const isGithubPages = location.hostname.includes('github.io');
-const repoPrefix = isGithubPages ? '/AKB48-Sukigao/' : './';
-
-const allMembers = rawNames.map((name, index) => ({
+// 同じフォルダ内にある画像をストレートに指定する形（エラーの原因となる外部プレースホルダーを排除）
+const allMembers = rawNames.map((name, index) => {
+return {
 id: index + 1,
 name: name,
-img: `${repoPrefix}${name}.jpg`
-}));
+img: `${name}.jpg`
+};
+});
 
 let prelimSelected = [];
 let currentPage = 0;
@@ -330,7 +333,7 @@ const isSelected = prelimSelected.some(m => m.id === member.id);
 const card = document.createElement('div');
 card.className = `card ${isSelected ? 'selected' : ''}`;
 card.onclick = () => togglePrelimSelect(member);
-card.innerHTML = `<img src="${member.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${member.name}')"><span class="name">${member.name}</span>`;
+card.innerHTML = `<img src="${member.img}" loading="lazy"><span class="name">${member.name}</span>`;
 grid.appendChild(card);
 });
 
@@ -430,11 +433,9 @@ currentLeft = currentPair.left;
 currentRight = currentPair.right;
 
 document.getElementById('fighter0-img').src = currentLeft[0].img;
-document.getElementById('fighter0-img').onerror = function() { this.src = 'https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=' + encodeURIComponent(currentLeft[0].name); };
 document.getElementById('fighter0-name').innerText = currentLeft[0].name;
 
 document.getElementById('fighter1-img').src = currentRight[0].img;
-document.getElementById('fighter1-img').onerror = function() { this.src = 'https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text=' + encodeURIComponent(currentRight[0].name); };
 document.getElementById('fighter1-name').innerText = currentRight[0].name;
 }
 
@@ -471,7 +472,7 @@ const m1 = kami7[0];
 rank1Container.innerHTML = `
 <div class="rank-1-card">
 <span style="position:absolute; top:8px; right:12px; font-size:20px;">👑</span>
-<img src="${m1.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${m1.name}')">
+<img src="${m1.img}">
 <div class="rank-1-info">
 <div class="rank-1-badge">第 1 位 (CENTER)</div>
 <div class="rank-1-name">${m1.name}</div>
@@ -490,7 +491,7 @@ const card = document.createElement('div');
 card.className = 'rank-card';
 card.innerHTML = `
 <div class="rank-badge-sub">${rankNum}</div>
-<img src="${member.img}" crossorigin="anonymous" onerror="this.src='https://placehold.jp/24/ffb3d9/ffffff/200x200.png?text='+encodeURIComponent('${member.name}')">
+<img src="${member.img}">
 <div class="rank-name-sub">${member.name}</div>
 `;
 rankSubGrid.appendChild(card);
@@ -509,4 +510,3 @@ a.click();
 </script>
 </body>
 </html>
-
